@@ -39,17 +39,21 @@ fn parse_url(line: String) -> Option<Url> {
   }
 }
 
-#[test]
-fn test_parse_url() -> Result<(), ParseError> {
-  let issue_list_url = Url::parse("https://github.com")?;
-  assert_eq!(
-    parse_url("https://github.com".to_string()),
-    Some(issue_list_url)
-  );
-  Ok(())
-}
+#[cfg(test)]
+mod tests {
+  use super::*;
+  #[test]
+  fn test_parse_url() -> Result<(), ParseError> {
+    let issue_list_url = Url::parse("https://github.com")?;
+    assert_eq!(
+      parse_url("https://github.com".to_string()),
+      Some(issue_list_url)
+    );
+    Ok(())
+  }
 
-#[test]
-fn test_parse_url_failure() {
-  assert_eq!(parse_url("http://[:::1]".to_string()), None);
+  #[test]
+  fn test_parse_url_failure() {
+    assert_eq!(parse_url("http://[:::1]".to_string()), None);
+  }
 }
