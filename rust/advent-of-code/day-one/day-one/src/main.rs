@@ -51,6 +51,6 @@ fn sum_fuel(mass: f64, total: &mut f64) {
         *total += mass_calc;
         sum_fuel(mass_calc, total);
     } else {
-        unreachable!()
+        unimplemented!()
     }
 }
