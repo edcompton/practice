@@ -17,7 +17,7 @@ fn mean(vec: &Vec<usize>) -> usize {
 
 fn median(vec: &mut Vec<usize>) -> usize {
     vec.sort();
-    println!("{:?}", vec);
+    println!("sorted vector: {:?}", vec);
     let length = vec.len();
     let half_vec = ((length / 2) as f32).floor() as usize;
     if length % 2 == 0 {
