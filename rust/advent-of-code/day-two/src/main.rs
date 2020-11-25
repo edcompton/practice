@@ -2,6 +2,10 @@ use std::fs;
 
 const FILENAME1: &str = "./input.txt";
 fn main() {
+    initialise_intcode_program()
+}
+
+fn initialise_intcode_program() {
     for x in 0..100 {
         let mut result = run_intcode_program(x, 1);
         if result != 19690720 {
@@ -19,14 +23,14 @@ fn main() {
 }
 
 fn run_intcode_program(noun: usize, verb: usize) -> usize {
-    let mut file_indices = get_file_input();
+    let mut file_indices = get_file_input(FILENAME1);
     restore_gravity_assist_program(noun, verb, &mut file_indices);
     move_position(&mut file_indices, 0);
     file_indices[0]
 }
 
-fn get_file_input() -> Vec<usize> {
-    fs::read_to_string(FILENAME1)
+fn get_file_input(filename: &str) -> Vec<usize> {
+    fs::read_to_string(filename)
         .expect("Something went wrong reading the file")
         .trim_end()
         .split(",")
