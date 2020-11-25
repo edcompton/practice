@@ -2,10 +2,27 @@ use std::fs;
 
 const FILENAME1: &str = "./input.txt";
 fn main() {
+    for x in 0..100 {
+        let mut result = run_intcode_program(x, 1);
+        if result != 19690720 {
+            for y in 0..100 {
+                result = run_intcode_program(x, y);
+                if result == 19690720 {
+                    println!("{}", x);
+                    println!("{}", y);
+                    println!("{}", result);
+                    return;
+                }
+            }
+        }
+    }
+}
+
+fn run_intcode_program(noun: usize, verb: usize) -> usize {
     let mut file_indices = get_file_input();
-    restore_gravity_assist_program(&mut file_indices);
+    restore_gravity_assist_program(noun, verb, &mut file_indices);
     move_position(&mut file_indices, 0);
-    println!("{:?}", file_indices);
+    file_indices[0]
 }
 
 fn get_file_input() -> Vec<usize> {
@@ -17,25 +34,26 @@ fn get_file_input() -> Vec<usize> {
         .collect()
 }
 
-fn restore_gravity_assist_program(vec: &mut Vec<usize>) {
-    vec[1] = 12;
-    vec[2] = 2;
+fn restore_gravity_assist_program(noun: usize, verb: usize, vec: &mut Vec<usize>) {
+    vec[1] = noun;
+    vec[2] = verb;
 }
 
 fn move_position(vec: &mut Vec<usize>, pos: usize) {
     let opcode = vec[pos];
     if opcode == 99 {
         return;
-    }
-    let first_pos = vec[pos + 1];
-    let second_pos = vec[pos + 2];
-    let result_pos = vec[pos + 3];
+    } else {
+        let first_param_address = vec[pos + 1];
+        let second_param_address = vec[pos + 2];
+        let result_address = vec[pos + 3];
 
-    match opcode {
-        99 => return,
-        1 => vec[result_pos] = vec[first_pos] + vec[second_pos],
-        2 => vec[result_pos] = vec[first_pos] * vec[second_pos],
-        _ => return,
+        match opcode {
+            1 => vec[result_address] = vec[first_param_address] + vec[second_param_address],
+            2 => vec[result_address] = vec[first_param_address] * vec[second_param_address],
+            _ => return,
+        }
+
+        move_position(vec, pos + 4);
     }
-    move_position(vec, pos + 4);
 }
