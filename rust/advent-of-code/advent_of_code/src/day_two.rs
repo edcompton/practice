@@ -1,3 +1,4 @@
+use super::computer::{Computer, ComputerActions};
 use super::error::Error;
 use std::fs;
 
@@ -9,51 +10,22 @@ pub fn run() -> Result<Vec<i32>, Error> {
 
 fn initialise_intcode_program() -> Vec<i32> {
     let mut results = Vec::new();
-    results.push(run_intcode_program(12, 2));
+    let file_indices = get_file_input(FILENAME1);
+    let mut computer = Computer::new(12, 2, file_indices);
+    computer.run();
+    results.push(computer.computed_values[0] as i32);
     'outer: for x in 0..100 {
-        let mut result = run_intcode_program(x, 1);
-        if result != 19690720 {
-            for y in 0..100 {
-                result = run_intcode_program(x, y);
-                if result == 19690720 {
-                    results.push(result);
-                    break 'outer;
-                }
+        for y in 0..100 {
+            computer.reset(x, y);
+            computer.run();
+            let result = computer.computed_values[0];
+            if result == 19_690_720 {
+                results.push(result as i32);
+                break 'outer;
             }
         }
     }
     results
-}
-
-fn run_intcode_program(noun: usize, verb: usize) -> i32 {
-    let mut file_indices = get_file_input(FILENAME1);
-    restore_gravity_assist_program(noun, verb, &mut file_indices);
-    run_computer(&mut file_indices, 0);
-    file_indices[0] as i32
-}
-
-fn restore_gravity_assist_program(noun: usize, verb: usize, vec: &mut Vec<usize>) {
-    vec[1] = noun;
-    vec[2] = verb;
-}
-
-fn run_computer(vec: &mut Vec<usize>, pos: usize) {
-    let opcode = vec[pos];
-    if opcode == 99 {
-        return;
-    } else {
-        let first_position_address = vec[pos + 1];
-        let second_position_address = vec[pos + 2];
-        let result_address = vec[pos + 3];
-
-        match opcode {
-            1 => vec[result_address] = vec[first_position_address] + vec[second_position_address],
-            2 => vec[result_address] = vec[first_position_address] * vec[second_position_address],
-            _ => return,
-        }
-
-        run_computer(vec, pos + 4);
-    }
 }
 
 fn get_file_input(filename: &str) -> Vec<usize> {

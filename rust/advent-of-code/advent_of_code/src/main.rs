@@ -21,7 +21,7 @@ fn main() -> Result<(), Error> {
     println!("\nDay: {day}", day = opt.day);
     for (i, answer) in answers.iter().enumerate() {
         println!(
-            "\nAnswer number: {number}\nAnswer: {answer}\n",
+            "Answer {number}: {answer}\n",
             number = i + 1,
             answer = answer
         )
