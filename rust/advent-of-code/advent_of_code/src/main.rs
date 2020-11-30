@@ -15,6 +15,7 @@ fn main() -> Result<(), Error> {
     let answers = match opt.day {
         1 => advent_of_code::day_one::run()?,
         2 => advent_of_code::day_two::run()?,
+        3 => advent_of_code::day_three::run()?,
         _ => return Err(Error::Custom(String::from("No valid day given"))),
     };
 
