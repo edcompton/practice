@@ -9,3 +9,6 @@ edition = "2018"
 [dependencies]
 libmath = "0.2.1"
 structopt = "0.3.20"
+enum_derive = "0.1.7"
+custom_derive = "0.1.7"
+differ = "1"
