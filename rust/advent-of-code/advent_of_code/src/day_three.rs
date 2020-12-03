@@ -13,7 +13,7 @@ pub fn run() -> Result<Vec<i32>, Error> {
     let (first_wire, second_wire) = create_instruction_arrays(file_input);
     let first_coordinates = get_coordinates(first_wire);
     let second_coordinates = get_coordinates(second_wire);
-    let closest_crossing_coordinates =
+    let (closest_crossing_coordinates, _) =
         compare_wire_coordinates(first_coordinates, second_coordinates);
     Ok(vec![closest_crossing_coordinates])
 }
@@ -67,26 +67,62 @@ fn get_coordinates(input: Vec<(Direction, i32)>) -> Vec<(i32, i32)> {
     acc
 }
 
-fn compare_wire_coordinates(first_wire: Vec<(i32, i32)>, second_wire: Vec<(i32, i32)>) -> i32 {
+fn compare_wire_coordinates(
+    first_wire: Vec<(i32, i32)>,
+    second_wire: Vec<(i32, i32)>,
+) -> (i32, Vec<(usize, usize)>) {
     let differ = Differ::new(&first_wire, &second_wire);
     let mut cross_points = Vec::new();
+    let mut cross_array_positions = Vec::new();
     for span in differ.spans() {
         if span.tag == Tag::Equal {
-            let (a, b) = first_wire[span.a_start];
-            let mut total = 0;
-            if a < 0 {
-                total = (a * -1) + b;
-            } else if b < 0 {
-                total = (b * -1) + a;
-            } else {
-                total = a + b;
-            }
-            cross_points.push(total);
+            let span = &first_wire[span.a_start];
+            cross_points.push(sum_steps(*span));
+            calculate_crossing_array_positions(
+                &first_wire,
+                &second_wire,
+                span,
+                &mut cross_array_positions,
+            );
         }
     }
-
     cross_points.sort();
-    cross_points[1]
+    let closest_intersection = cross_points[1];
+
+    let mut total_steps = cross_array_positions
+        .iter()
+        .map(|(x, y)| x + y)
+        .collect::<Vec<usize>>();
+    total_steps.sort();
+
+    println!("{:?}", total_steps);
+    (closest_intersection, cross_array_positions)
+}
+
+fn sum_steps(span: (i32, i32)) -> i32 {
+    let (a, b) = span;
+    if a < 0 {
+        (a * -1) + b
+    } else if b < 0 {
+        (b * -1) + a
+    } else {
+        a + b
+    }
+}
+
+fn calculate_crossing_array_positions(
+    first_wire: &Vec<(i32, i32)>,
+    second_wire: &Vec<(i32, i32)>,
+    span: &(i32, i32),
+    position_array: &mut Vec<(usize, usize)>,
+) {
+    if let Some(first_position) = first_wire.iter().position(|x| x == span) {
+        println!("first position {}", first_position);
+        if let Some(second_position) = second_wire.iter().position(|x| x == span) {
+            println!("second position {}", second_position);
+            position_array.push((first_position, second_position))
+        }
+    }
 }
 
 custom_derive! {
@@ -96,5 +132,22 @@ custom_derive! {
     D,
     L,
     R,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_sum_steps() {
+        assert_eq!(
+            sum_steps((20, 20)),
+            40,
+            "Two values should be equal to each other"
+        );
+    }
+    #[test]
+    fn test_sum_steps_with_incorrect_values() {
+        assert_ne!(sum_steps((2, 2)), 40);
     }
 }
