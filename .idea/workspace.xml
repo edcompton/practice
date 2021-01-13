@@ -13,12 +13,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8c4dceba-1ad8-4c24-a2c2-8f8581cda27a" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/rust/advent-of-code/advent_of_code/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/advent-of-code/advent_of_code/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/advent-of-code/advent_of_code/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/projects/minigrep/poem.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/projects/minigrep/src/lib.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rust/advent-of-code/advent_of_code/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/rust/advent-of-code/advent_of_code/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust/projects/minigrep/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/rust/projects/minigrep/src/lib.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust/projects/minigrep/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/rust/projects/minigrep/src/main.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,6 +34,14 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
   </component>
   <component name="MacroExpansionManager">
     <option name="directoryName" value="kp07r7fi" />
@@ -63,14 +68,37 @@
     <property name="org.rust.cargo.project.model.PROJECT_DISCOVERY" value="true" />
     <property name="settings.editor.selected.configurable" value="preferences.editor.code.editing" />
   </component>
-  <component name="RunManager" selected="Cargo.Test test::error_config_create">
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
+  <component name="RunManager" selected="Cargo.Test lib::test">
+    <configuration name="Test lib::test" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package minigrep --lib test" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$/rust/projects/minigrep" />
+      <option name="channel" value="DEFAULT" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
       <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test test::create_new_config" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="command" value="test --package minigrep --lib test::create_new_config -- --exact" />
+    <configuration name="Test test::case_insensitive" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package minigrep --lib test::case_insensitive -- --exact" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$/rust/projects/minigrep" />
+      <option name="channel" value="DEFAULT" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test test::case_sensitive" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package minigrep --lib test::case_sensitive -- --exact" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$/rust/projects/minigrep" />
       <option name="channel" value="DEFAULT" />
       <option name="allFeatures" value="false" />
@@ -97,8 +125,8 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="run" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="command" value="run needle poem.txt" />
+    <configuration name="Test test::one_result" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package minigrep --lib test::one_result -- --exact" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$/rust/projects/minigrep" />
       <option name="channel" value="DEFAULT" />
       <option name="allFeatures" value="false" />
@@ -111,12 +139,18 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
+    <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Cargo.Test lib::test" />
+        <item itemvalue="Cargo.Test test::case_insensitive" />
+        <item itemvalue="Cargo.Test test::case_sensitive" />
+        <item itemvalue="Cargo.Test test::one_result" />
         <item itemvalue="Cargo.Test test::error_config_create" />
-        <item itemvalue="Cargo.Test test::create_new_config" />
-        <item itemvalue="Cargo.run" />
-        <item itemvalue="Cargo.run" />
       </list>
     </recent_temporary>
   </component>
@@ -134,7 +168,8 @@
       <option name="presentableId" value="Default" />
       <updated>1610356931433</updated>
       <workItem from="1610356933117" duration="847000" />
-      <workItem from="1610357791140" duration="6073000" />
+      <workItem from="1610357791140" duration="7717000" />
+      <workItem from="1610368093937" duration="1579000" />
     </task>
     <servers />
   </component>
