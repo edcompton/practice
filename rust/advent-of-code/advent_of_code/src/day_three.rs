@@ -11,11 +11,35 @@ const FILENAME1: &str = "./inputs/day_three/input.txt";
 pub fn run() -> Result<Vec<i32>, Error> {
     let file_input = get_file_input(FILENAME1);
     let (first_wire, second_wire) = create_instruction_arrays(file_input);
-    let first_result_tuple = get_coordinates(first_wire);
-    let second_result_tuple = get_coordinates(second_wire);
+    let first_wire_results = get_coordinates(first_wire);
+    let second_wire_results = get_coordinates(second_wire);
     let (closest_crossing_coordinates, fewest_steps) =
-        compare_wire_coordinates(first_result_tuple, second_result_tuple);
+        compare_wire_coordinates(first_wire_results, second_wire_results);
     Ok(vec![closest_crossing_coordinates, fewest_steps])
+}
+
+struct Moves {
+    coordinates: Vec<(i32,i32)>,
+    coordinates_map: HashMap<(i32, i32), i32>,
+}
+
+impl Moves {
+    pub fn new() -> Self {
+        Moves {
+            coordinates: vec![(0,0)],
+            coordinates_map: HashMap::new(),
+        }
+    }
+}
+
+custom_derive! {
+#[derive(Debug, EnumFromStr, PartialEq, Clone)]
+    enum Direction {
+    U,
+    D,
+    L,
+    R,
+    }
 }
 
 fn get_file_input(filename: &str) -> Vec<String> {
@@ -47,72 +71,51 @@ fn create_instruction_arrays(
     (result[0].clone(), result[1].clone())
 }
 
-struct Moves {
-    coordinates: Vec<(i32,i32)>,
-    steps: i32,
-}
-
-impl Moves {
-    pub fn new() -> Self {
-        Moves {
-            coordinates: vec![(0,0)],
-            steps: 0,
-        }
-    }
-    pub fn coordinates(&self) -> &Vec<(i32, i32)> {
-        &self.coordinates
-    }
-    pub fn steps(&self) -> i32 {
-        self.steps
-    }
-}
-
-fn get_coordinates(input: Vec<(Direction, i32)>) -> (Vec<(i32,i32)>,HashMap<(i32, i32), i32>) {
-    let mut acc = vec![(0,0)];
+fn get_coordinates(input: Vec<(Direction, i32)>) -> Moves {
+    let mut acc = Moves::new();
     let mut total = 0;
-    let mut hash_map: HashMap<(i32, i32), i32> = HashMap::new();
     for (instruction, move_amount) in input.iter() {
         for _ in 0..*move_amount {
             total += 1;
-            let previous_index = acc.len() - 1;
-            let x = acc[previous_index].0;
-            let y = acc[previous_index].1;
+            let previous_index = acc.coordinates.len() - 1;
+            let x = acc.coordinates[previous_index].0;
+            let y = acc.coordinates[previous_index].1;
             match instruction {
-                Direction::U => acc.push((acc[previous_index].0, y + 1)),
-                Direction::D => acc.push((acc[previous_index].0, y - 1)),
-                Direction::R => acc.push((x + 1, acc[previous_index].1)),
-                Direction::L => acc.push((x - 1, acc[previous_index].1)),
+                Direction::U => acc.coordinates.push((acc.coordinates[previous_index].0, y + 1)),
+                Direction::D => acc.coordinates.push((acc.coordinates[previous_index].0, y - 1)),
+                Direction::R => acc.coordinates.push((x + 1, acc.coordinates[previous_index].1)),
+                Direction::L => acc.coordinates.push((x - 1, acc.coordinates[previous_index].1)),
             };
-            hash_map.entry(acc[acc.len()-1].clone()).or_insert(total);
+            acc.coordinates_map.entry(acc.coordinates[acc.coordinates.len()-1].clone()).or_insert(total);
         }
     }
-    println!("{:?}",hash_map);
-    acc.sort();
-    (acc, hash_map)
+
+    acc.coordinates.sort();
+    acc
 }
 
 fn compare_wire_coordinates(
-    first_tuple: (Vec<(i32,i32)>,HashMap<(i32, i32), i32>),
-    second_tuple: (Vec<(i32,i32)>,HashMap<(i32, i32), i32>),
+    mut first_wire_results: Moves,
+    mut second_wire_results: Moves,
 ) -> (i32, i32) {
-    let (first_wire, mut first_hash) = first_tuple;
-    let (second_wire, mut second_hash) = second_tuple;
+    let first_wire= first_wire_results.coordinates;
+    let second_wire = second_wire_results.coordinates;
     let differ = Differ::new(&first_wire, &second_wire);
     let mut cross_points = Vec::new();
     let mut cross_array_positions = Vec::new();
     for span in differ.spans() {
         if span.tag == Tag::Equal {
             let span = &first_wire[span.a_start];
-            println!("{:?}", span);
-            println!("{:?} {:?}", first_hash.entry(*span), second_hash.entry(*span));
-            cross_array_positions.push(calculate_crossing_array_positions(&mut first_hash, &mut second_hash, span));
-            cross_points.push(sum_steps(span.clone()));
+            cross_array_positions.push(calculate_crossing_array_positions(
+                &mut first_wire_results.coordinates_map,
+                &mut second_wire_results.coordinates_map,
+                span
+            ));
+            cross_points.push(sum_steps(span.clone()))
         }
     }
     cross_points.sort();
     cross_array_positions.sort();
-    println!("{:?}", cross_array_positions);
-
     (cross_points[1], cross_array_positions[1] as i32)
 }
 
@@ -138,23 +141,11 @@ fn calculate_crossing_array_positions(
 ) -> i32 {
     let mut result= 0;
     if let Some(first_position) = first_hash.get(span) {
-        println!("first position {}", first_position);
         if let Some(second_position) = second_hash.get(span) {
-            println!("second position {}", second_position);
             result = (first_position + second_position) as i32
         }
     }
     result
-}
-
-custom_derive! {
-#[derive(Debug, EnumFromStr, PartialEq, Clone)]
-    enum Direction {
-    U,
-    D,
-    L,
-    R,
-    }
 }
 
 #[cfg(test)]
