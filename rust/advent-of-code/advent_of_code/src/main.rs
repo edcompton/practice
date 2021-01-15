@@ -16,6 +16,7 @@ fn main() -> Result<(), Error> {
         1 => advent_of_code::day_one::run()?,
         2 => advent_of_code::day_two::run()?,
         3 => advent_of_code::day_three::run()?,
+        4 => advent_of_code::day_four::run()?,
         _ => return Err(Error::Custom(String::from("No valid day given"))),
     };
 
