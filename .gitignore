@@ -5,6 +5,6 @@ target
 # its dependencies, but let the downstream crate decide.
 Cargo.lock
 .DS_Store
-.idea/
+*.idea/
 
 *.swp
