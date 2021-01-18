@@ -25,12 +25,18 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(args: &[String]) -> Result<Self, &'static str> {
-        if args.len() < 3 {
-            return Err("not enough arguments!");
-        }
-        let query = args[1].clone();
-        let filename = args[2].clone();
+    pub fn new(mut args: impl Iterator<Item=String>) -> Result<Self, &'static str> {
+        args.next();
+
+        let query = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a query string")
+        };
+
+        let filename = match args.next() {
+            Some(arg)=> arg,
+            None => return Err("Didn't get a file name")
+        };
 
         let case_sensitive = env::var("CASE_INSENSITIVE").is_err();
         Ok(Config {
@@ -42,13 +48,7 @@ impl Config {
 }
 
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    let mut results = Vec::new();
-    for line in contents.lines() {
-        if line.contains(query) {
-            results.push(line);
-        }
-    }
-    results
+    contents.lines().filter(|line| line.contains(query)).collect()
 }
 
 pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
@@ -68,8 +68,9 @@ mod test {
     use super::*;
     #[test]
     fn create_new_config() {
+            let args = vec!["test".into(), "test arg 1".into(), "test arg 2".into()].into_iter();
         assert_eq!(
-            Config::new(&["test".into(), "test arg 1".into(), "test arg 2".into()]).unwrap(),
+            Config::new(args).unwrap(),
             Config {
                 query: String::from("test arg 1"),
                 filename: String::from("test arg 2"),
@@ -80,9 +81,10 @@ mod test {
 
     #[test]
     fn error_config_create() {
-        let result = Config::new(&["test arg 1".into(), "test arg 2".into()])
-            .expect_err("not enough arguments!");
-        assert_eq!(result, "not enough arguments!")
+        let args = vec!["test arg 1".into(), "test arg 2".into()].into_iter();
+        let result = Config::new(args)
+            .expect_err("Didn't get a file name");
+        assert_eq!(result, "Didn't get a file name")
     }
 
     #[test]
