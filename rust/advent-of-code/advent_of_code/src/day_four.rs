@@ -28,7 +28,7 @@ pub fn run() -> Result<Vec<i32>, Error> {
     Ok(vec![part_1, part_2])
 }
 
-struct RangeChecker {
+pub struct RangeChecker {
     range_vec: Vec<i32>,
     part_one_matches: Vec<i32>,
     part_two_matches: Vec<i32>
@@ -79,13 +79,24 @@ impl RangeMethods for RangeChecker {
             }
         }
     }
-
+    /// Gets the results that match the given range.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use crate::advent_of_code::day_four::*;
+    /// let mut range_finder = RangeChecker::new(112233, 112234);
+    /// range_finder.check_range_for_matches();
+    /// let matches = range_finder.get_matches();
+    ///
+    /// assert_eq!(matches, (2 as i32, 2 as i32));
+    /// ```
     fn get_matches(&self) -> (i32, i32) {
         (self.part_one_matches.len() as i32, self.part_two_matches.len() as i32)
     }
 }
 
-trait RangeMethods {
+pub trait RangeMethods {
     fn new(start: i32, finish: i32) -> Self;
     fn check_range_for_matches(&mut self);
     fn get_matches(&self) -> (i32, i32);
