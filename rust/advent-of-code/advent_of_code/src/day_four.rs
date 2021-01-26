@@ -22,7 +22,7 @@ use super::error::Error;
 use std::collections::HashMap;
 
 pub fn run() -> Result<Vec<i32>, Error> {
-    let mut range_checker = RangeChecker::new(234208,765869);
+    let mut range_checker = RangeChecker::new(234208, 765869);
     range_checker.check_range_for_matches();
     let (part_1, part_2) = range_checker.get_matches();
     Ok(vec![part_1, part_2])
@@ -31,15 +31,15 @@ pub fn run() -> Result<Vec<i32>, Error> {
 pub struct RangeChecker {
     range_vec: Vec<i32>,
     part_one_matches: Vec<i32>,
-    part_two_matches: Vec<i32>
+    part_two_matches: Vec<i32>,
 }
 
 impl RangeMethods for RangeChecker {
     fn new(start: i32, finish: i32) -> Self {
         RangeChecker {
-            range_vec: (start..finish+1).collect(),
+            range_vec: (start..finish + 1).collect(),
             part_one_matches: Vec::new(),
-            part_two_matches: Vec::new()
+            part_two_matches: Vec::new(),
         }
     }
 
@@ -48,7 +48,12 @@ impl RangeMethods for RangeChecker {
             let mut neighbouring_identical_nums = false;
             let mut all_ascending_num = false;
             let mut double_digit_hashmap: HashMap<u32, u32> = HashMap::new();
-            let num_as_slice: Vec<u32> = val.clone().to_string().chars().map(|d| d.to_digit(10).unwrap()).collect();
+            let num_as_slice: Vec<u32> = val
+                .clone()
+                .to_string()
+                .chars()
+                .map(|d| d.to_digit(10).unwrap())
+                .collect();
 
             for (i, num) in num_as_slice.clone().into_iter().enumerate() {
                 if i > 0 && num < num_as_slice[i - 1] {
@@ -69,9 +74,11 @@ impl RangeMethods for RangeChecker {
                 }
             }
 
-
-            if double_digit_hashmap.values().any(|&x| x == 1) && all_ascending_num && neighbouring_identical_nums {
-                    self.part_two_matches.push(val);
+            if double_digit_hashmap.values().any(|&x| x == 1)
+                && all_ascending_num
+                && neighbouring_identical_nums
+            {
+                self.part_two_matches.push(val);
             }
 
             if all_ascending_num && neighbouring_identical_nums {
@@ -92,7 +99,10 @@ impl RangeMethods for RangeChecker {
     /// assert_eq!(matches, (2 as i32, 2 as i32));
     /// ```
     fn get_matches(&self) -> (i32, i32) {
-        (self.part_one_matches.len() as i32, self.part_two_matches.len() as i32)
+        (
+            self.part_one_matches.len() as i32,
+            self.part_two_matches.len() as i32,
+        )
     }
 }
 
@@ -107,8 +117,8 @@ mod test {
     use super::*;
     #[test]
     fn create_range_checker() {
-        let range_checker = RangeChecker::new(1,10);
+        let range_checker = RangeChecker::new(1, 10);
         // assert_eq!(range_checker.range_vec.len(), 10);
-        assert_eq!(range_checker.range_vec, vec![1,2,3,4,5,6,7,8,9,10]);
+        assert_eq!(range_checker.range_vec, vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     }
 }

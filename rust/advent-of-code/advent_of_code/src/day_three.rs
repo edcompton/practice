@@ -3,8 +3,8 @@
 // Aim is to find the point that both wires cross closest to the central port
 use super::error::Error;
 use differ::{Differ, Tag};
-use std::fs;
 use std::collections::HashMap;
+use std::fs;
 
 const FILENAME1: &str = "./inputs/day_three/input.txt";
 
@@ -19,14 +19,14 @@ pub fn run() -> Result<Vec<i32>, Error> {
 }
 
 struct Moves {
-    coordinates: Vec<(i32,i32)>,
+    coordinates: Vec<(i32, i32)>,
     coordinates_map: HashMap<(i32, i32), i32>,
 }
 
 impl Moves {
     pub fn new() -> Self {
         Moves {
-            coordinates: vec![(0,0)],
+            coordinates: vec![(0, 0)],
             coordinates_map: HashMap::new(),
         }
     }
@@ -81,12 +81,22 @@ fn get_coordinates(input: Vec<(Direction, i32)>) -> Moves {
             let x = acc.coordinates[previous_index].0;
             let y = acc.coordinates[previous_index].1;
             match instruction {
-                Direction::U => acc.coordinates.push((acc.coordinates[previous_index].0, y + 1)),
-                Direction::D => acc.coordinates.push((acc.coordinates[previous_index].0, y - 1)),
-                Direction::R => acc.coordinates.push((x + 1, acc.coordinates[previous_index].1)),
-                Direction::L => acc.coordinates.push((x - 1, acc.coordinates[previous_index].1)),
+                Direction::U => acc
+                    .coordinates
+                    .push((acc.coordinates[previous_index].0, y + 1)),
+                Direction::D => acc
+                    .coordinates
+                    .push((acc.coordinates[previous_index].0, y - 1)),
+                Direction::R => acc
+                    .coordinates
+                    .push((x + 1, acc.coordinates[previous_index].1)),
+                Direction::L => acc
+                    .coordinates
+                    .push((x - 1, acc.coordinates[previous_index].1)),
             };
-            acc.coordinates_map.entry(acc.coordinates[acc.coordinates.len()-1].clone()).or_insert(total);
+            acc.coordinates_map
+                .entry(acc.coordinates[acc.coordinates.len() - 1].clone())
+                .or_insert(total);
         }
     }
 
@@ -98,7 +108,7 @@ fn compare_wire_coordinates(
     mut first_wire_results: Moves,
     mut second_wire_results: Moves,
 ) -> (i32, i32) {
-    let first_wire= first_wire_results.coordinates;
+    let first_wire = first_wire_results.coordinates;
     let second_wire = second_wire_results.coordinates;
     let differ = Differ::new(&first_wire, &second_wire);
     let mut cross_points = Vec::new();
@@ -109,7 +119,7 @@ fn compare_wire_coordinates(
             cross_array_positions.push(calculate_crossing_array_positions(
                 &mut first_wire_results.coordinates_map,
                 &mut second_wire_results.coordinates_map,
-                span
+                span,
             ));
             cross_points.push(sum_steps(span.clone()))
         }
@@ -139,7 +149,7 @@ fn calculate_crossing_array_positions(
     second_hash: &mut HashMap<(i32, i32), i32>,
     span: &(i32, i32),
 ) -> i32 {
-    let mut result= 0;
+    let mut result = 0;
     if let Some(first_position) = first_hash.get(span) {
         if let Some(second_position) = second_hash.get(span) {
             result = (first_position + second_position) as i32
