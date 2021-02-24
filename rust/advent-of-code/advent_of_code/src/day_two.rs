@@ -12,6 +12,7 @@ fn initialise_intcode_program() -> Vec<i32> {
     let mut results = Vec::new();
     let file_indices = get_file_input(FILENAME1);
     let mut computer = Computer::new(12, 2, file_indices);
+    computer.restore_gravity_assist_program();
     computer.run();
     results.push(computer.computed_values[0] as i32);
     'outer: for x in 0..100 {
@@ -28,11 +29,11 @@ fn initialise_intcode_program() -> Vec<i32> {
     results
 }
 
-fn get_file_input(filename: &str) -> Vec<usize> {
+fn get_file_input(filename: &str) -> Vec<i32> {
     fs::read_to_string(filename)
         .expect("Something went wrong reading the file")
         .trim_end()
         .split(",")
-        .map(|v| v.to_string().parse::<usize>().unwrap())
+        .map(|v| v.to_string().parse::<i32>().unwrap())
         .collect()
 }
