@@ -4,7 +4,7 @@ use std::io;
 pub struct Computer {
     noun: i32,
     verb: i32,
-    current_pos: usize,
+    instruction_pointer: usize,
     params: Option<Vec<usize>>,
     pub start_input: Vec<i32>,
     pub computed_values: Vec<i32>,
@@ -24,7 +24,7 @@ impl ComputerActions for Computer {
             noun,
             verb,
             params: None,
-            current_pos: 0,
+            instruction_pointer: 0,
             computed_values: start_input.clone(),
             start_input,
             current_values: Values {
@@ -45,28 +45,29 @@ impl ComputerActions for Computer {
 
     // To implement param mode, each value needs to be computed (grabbed the address or used the value)
     fn run(&mut self) {
-        let opcode = self.format_instructions(self.computed_values[self.current_pos]);
+        let opcode = self.format_instructions(self.computed_values[self.instruction_pointer]);
         if opcode == 99 {
             return;
         } else {
             match opcode {
                 1 => {
-                    self.get_values(2);
+                    self.compute_values(2);
                     let computed_values = self.current_values.values.as_ref().unwrap();
                     self.computed_values[self.current_values.address] =
                         computed_values[0] + computed_values[1];
-                    self.current_pos += 4;
+                    self.instruction_pointer += 4;
                 }
                 2 => {
-                    self.get_values(2);
+                    self.compute_values(2);
                     let computed_values = self.current_values.values.as_ref().unwrap();
                     self.computed_values[self.current_values.address] =
                         computed_values[0] * computed_values[1];
-                    self.current_pos += 4;
+                    self.instruction_pointer += 4;
                 }
+                // 3 - Take an input and store at address
                 3 => {
                     print!("Please enter your input\n");
-                    self.get_values(0);
+                    self.compute_values(0);
                     let mut input = String::new();
                     io::stdin()
                         .read_line(&mut input)
@@ -75,20 +76,67 @@ impl ComputerActions for Computer {
 
                     self.computed_values[self.current_values.address] =
                         input.trim().parse::<i32>().unwrap();
-                    self.current_pos += 2;
+                    self.instruction_pointer += 2;
                 }
+                // 4 - Print the value at address
                 4 => {
                     if self.params.is_some() {
-                        let output_value = self.computed_values[self.current_pos + 1];
+                        let output_value = self.computed_values[self.instruction_pointer + 1];
                         println!("{}", output_value);
                         self.outputs.push(output_value)
                     } else {
-                        self.get_values(0);
+                        self.compute_values(0);
                         let output_value = self.computed_values[self.current_values.address];
                         println!("{}", output_value);
                         self.outputs.push(output_value);
                     }
-                    self.current_pos += 2;
+                    self.instruction_pointer += 2;
+                }
+                // 5 - if the first parameter is non-zero, it sets the instruction pointer to the value from the second parameter.
+                // Otherwise, it does nothing.
+                5 => {
+                    self.compute_values(2);
+                    let computed_values = self.current_values.values.as_ref().unwrap();
+                    if computed_values[0] != 0 {
+                        self.instruction_pointer = computed_values[1] as usize;
+                    } else {
+                        self.instruction_pointer += 3;
+                    }
+                }
+                // 6 - if the first parameter is zero, it sets the instruction pointer to the value from the second parameter.
+                // Otherwise, it does nothing.
+                6 => {
+                    self.compute_values(2);
+                    let computed_values = self.current_values.values.as_ref().unwrap();
+                    if computed_values[0] == 0 {
+                        self.instruction_pointer = computed_values[1] as usize;
+                    } else {
+                        self.instruction_pointer += 3;
+                    }
+                }
+                // 7 - if the first parameter is less than the second parameter, it stores 1 in the position given by the third parameter.
+                // Otherwise, it stores 0.
+                7 => {
+                    self.compute_values(2);
+                    let computed_values = self.current_values.values.as_ref().unwrap();
+                    if computed_values[0] < computed_values[1] {
+                        self.computed_values[self.current_values.address] = 1;
+                    } else {
+                        self.computed_values[self.current_values.address] = 0;
+                    }
+                    self.instruction_pointer += 4;
+                }
+                // 8 - if the first parameter is equal to the second parameter, it stores 1 in the position given by the third parameter.
+                // Otherwise, it stores 0.
+                8 => {
+                    self.compute_values(2);
+                    let computed_values = self.current_values.values.as_ref().unwrap();
+                    if computed_values[0] == computed_values[1] {
+                        self.computed_values[self.current_values.address] = 1;
+                    } else {
+                        self.computed_values[self.current_values.address] = 0;
+                    }
+                    self.instruction_pointer += 4;
                 }
                 _ => return,
             }
@@ -100,7 +148,7 @@ impl ComputerActions for Computer {
 
     fn reset(&mut self, noun: i32, verb: i32) {
         self.computed_values = self.start_input.clone();
-        self.current_pos = 0;
+        self.instruction_pointer = 0;
         self.noun = noun;
         self.verb = verb;
         self.restore_gravity_assist_program();
@@ -124,8 +172,9 @@ impl ComputerActions for Computer {
         }
     }
 
-    fn get_values(&mut self, num_of_values: usize) {
-        let result_address = self.computed_values[self.current_pos + num_of_values + 1] as usize;
+    fn compute_values(&mut self, num_of_values: usize) {
+        let result_address =
+            self.computed_values[self.instruction_pointer + num_of_values + 1] as usize;
         self.current_values.address = result_address;
         let mut current_values = Vec::new();
 
@@ -150,10 +199,12 @@ impl ComputerActions for Computer {
 
         for (i, param) in combined_map.iter() {
             if *param == 1 {
-                current_values.push(self.computed_values[self.current_pos + i])
+                current_values.push(self.computed_values[self.instruction_pointer + i])
             } else {
-                current_values
-                    .push(self.computed_values[self.computed_values[self.current_pos + i] as usize])
+                current_values.push(
+                    self.computed_values
+                        [self.computed_values[self.instruction_pointer + i] as usize],
+                )
             };
         }
     }
@@ -164,8 +215,9 @@ impl ComputerActions for Computer {
         current_values: &mut Vec<i32>,
     ) {
         for i in (1..=*num_of_values).into_iter() {
-            current_values
-                .push(self.computed_values[self.computed_values[self.current_pos + i] as usize]);
+            current_values.push(
+                self.computed_values[self.computed_values[self.instruction_pointer + i] as usize],
+            );
         }
     }
 }
@@ -211,7 +263,7 @@ pub trait ComputerActions {
     fn reset(&mut self, noun: i32, verb: i32);
     fn restore_gravity_assist_program(&mut self);
     fn format_instructions(&mut self, instruction: i32) -> i32;
-    fn get_values(&mut self, num_of_values: usize);
+    fn compute_values(&mut self, num_of_values: usize);
     fn compute_values_from_param_modes(
         &mut self,
         params_vec: Vec<usize>,
