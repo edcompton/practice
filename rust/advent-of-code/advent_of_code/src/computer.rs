@@ -35,6 +35,14 @@ impl ComputerActions for Computer {
         }
     }
 
+    fn write(&mut self, value: i32, action: &str) {
+        if action == "noun" {
+            self.noun = value;
+        } else if action == "verb" {
+            self.verb = value;
+        };
+    }
+
     // To implement param mode, each value needs to be computed (grabbed the address or used the value)
     fn run(&mut self) {
         let opcode = self.format_instructions(self.computed_values[self.current_pos]);
@@ -90,72 +98,6 @@ impl ComputerActions for Computer {
         }
     }
 
-    fn get_values(&mut self, num_of_values: usize) {
-        let result_address = self.computed_values[self.current_pos + num_of_values + 1] as usize;
-        self.current_values.address = result_address;
-
-        if let Some(params_vec) = self.params.clone() {
-            let mut current_values = Vec::new();
-            let combined_map: Vec<(usize, usize)> = (1..=num_of_values)
-                .collect::<Vec<usize>>()
-                .into_iter()
-                .zip(params_vec.into_iter())
-                .collect();
-
-            for (i, param) in combined_map.iter() {
-                if *param == 1 {
-                    current_values.push(self.computed_values[self.current_pos + i])
-                } else {
-                    current_values.push(
-                        self.computed_values[self.computed_values[self.current_pos + i] as usize],
-                    )
-                };
-            }
-            self.current_values.values = Some(current_values);
-        } else if num_of_values > 0 {
-            let current_values = (1..=num_of_values)
-                .into_iter()
-                .map(|i| self.computed_values[self.computed_values[self.current_pos + i] as usize])
-                .collect();
-            self.current_values.values = Some(current_values);
-        }
-    }
-
-    fn format_instructions(&mut self, instruction: i32) -> i32 {
-        if instruction.to_string().len() == 1 {
-            instruction
-        } else {
-            let mut instruction_vec = instruction
-                .to_string()
-                .chars()
-                .map(|d| d.to_digit(10).unwrap() as usize)
-                .collect::<Vec<usize>>();
-
-            let vec_len = instruction_vec.len();
-            let opcode_vec: Vec<usize> = instruction_vec.drain(vec_len - 2..vec_len).collect();
-            let opcode = opcode_vec[0].to_string() + &opcode_vec[1].to_string();
-            instruction_vec.reverse();
-            if instruction_vec.len() != 4 {
-                let additional_zeros = 4 - instruction_vec.len();
-                let mut zeros_vec: Vec<usize> = vec![0; additional_zeros];
-                instruction_vec.append(&mut zeros_vec);
-                self.params = Some(instruction_vec);
-            } else {
-                self.params = Some(instruction_vec);
-            }
-
-            opcode.parse::<i32>().unwrap()
-        }
-    }
-
-    fn write(&mut self, value: i32, action: &str) {
-        if action == "noun" {
-            self.noun = value;
-        } else if action == "verb" {
-            self.verb = value;
-        };
-    }
-
     fn reset(&mut self, noun: i32, verb: i32) {
         self.computed_values = self.start_input.clone();
         self.current_pos = 0;
@@ -168,6 +110,98 @@ impl ComputerActions for Computer {
         self.computed_values[1] = self.noun;
         self.computed_values[2] = self.verb;
     }
+
+    fn format_instructions(&mut self, instruction: i32) -> i32 {
+        if instruction.to_string().len() == 1 {
+            instruction
+        } else {
+            let mut instruction_vec = create_instruction_vec(&instruction);
+            let opcode = get_opcode_from_instruction_vec(&mut instruction_vec);
+            let formatted_instruction_vec = format_remaining_params(instruction_vec);
+
+            self.params = Some(formatted_instruction_vec);
+            opcode
+        }
+    }
+
+    fn get_values(&mut self, num_of_values: usize) {
+        let result_address = self.computed_values[self.current_pos + num_of_values + 1] as usize;
+        self.current_values.address = result_address;
+        let mut current_values = Vec::new();
+
+        if let Some(params_vec) = self.params.clone() {
+            self.compute_values_from_param_modes(params_vec, &num_of_values, &mut current_values);
+
+        //     No params, treat all instructions as indices
+        } else if num_of_values > 0 {
+            self.compute_values_from_positions(&num_of_values, &mut current_values);
+        }
+
+        self.current_values.values = Some(current_values);
+    }
+
+    fn compute_values_from_param_modes(
+        &mut self,
+        params_vec: Vec<usize>,
+        num_of_values: &usize,
+        current_values: &mut Vec<i32>,
+    ) {
+        let combined_map = combine_params_and_index(params_vec, &num_of_values);
+
+        for (i, param) in combined_map.iter() {
+            if *param == 1 {
+                current_values.push(self.computed_values[self.current_pos + i])
+            } else {
+                current_values
+                    .push(self.computed_values[self.computed_values[self.current_pos + i] as usize])
+            };
+        }
+    }
+
+    fn compute_values_from_positions(
+        &mut self,
+        num_of_values: &usize,
+        current_values: &mut Vec<i32>,
+    ) {
+        for i in (1..=*num_of_values).into_iter() {
+            current_values
+                .push(self.computed_values[self.computed_values[self.current_pos + i] as usize]);
+        }
+    }
+}
+
+fn create_instruction_vec(instruction: &i32) -> Vec<usize> {
+    instruction
+        .to_string()
+        .chars()
+        .map(|d| d.to_digit(10).unwrap() as usize)
+        .collect::<Vec<usize>>()
+}
+
+fn get_opcode_from_instruction_vec(instruction_vec: &mut Vec<usize>) -> i32 {
+    let vec_len = instruction_vec.len();
+    let opcode_vec: Vec<usize> = instruction_vec.drain(vec_len - 2..vec_len).collect();
+    let opcode = opcode_vec[0].to_string() + &opcode_vec[1].to_string();
+    opcode.parse::<i32>().unwrap()
+}
+
+fn format_remaining_params(instruction_vec: Vec<usize>) -> Vec<usize> {
+    let mut mutable_vec = instruction_vec;
+    mutable_vec.reverse();
+    if mutable_vec.len() != 4 {
+        let additional_zeros = 4 - mutable_vec.len();
+        let mut zeros_vec: Vec<usize> = vec![0; additional_zeros];
+        mutable_vec.append(&mut zeros_vec);
+    }
+    mutable_vec
+}
+
+fn combine_params_and_index(params_vec: Vec<usize>, num_of_values: &usize) -> Vec<(usize, usize)> {
+    (1..=*num_of_values)
+        .collect::<Vec<usize>>()
+        .into_iter()
+        .zip(params_vec.into_iter())
+        .collect()
 }
 
 pub trait ComputerActions {
@@ -178,4 +212,15 @@ pub trait ComputerActions {
     fn restore_gravity_assist_program(&mut self);
     fn format_instructions(&mut self, instruction: i32) -> i32;
     fn get_values(&mut self, num_of_values: usize);
+    fn compute_values_from_param_modes(
+        &mut self,
+        params_vec: Vec<usize>,
+        num_of_values: &usize,
+        current_values: &mut Vec<i32>,
+    );
+    fn compute_values_from_positions(
+        &mut self,
+        num_of_values: &usize,
+        current_values: &mut Vec<i32>,
+    );
 }
