@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="TestRangeTo" tests="3" skipped="0" failures="0" errors="0" timestamp="2021-03-22T12:43:47" hostname="Eds-MacBook-Pro.local" time="0.006">
+  <properties/>
+  <testcase name="testAfter" classname="TestRangeTo" time="0.004"/>
+  <testcase name="testBefore" classname="TestRangeTo" time="0.0"/>
+  <testcase name="testInRange" classname="TestRangeTo" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
