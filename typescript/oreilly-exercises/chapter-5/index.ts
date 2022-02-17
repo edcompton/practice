@@ -129,13 +129,8 @@ Shoe.create('balletFlat');
 // Would it be easier to make this guarantee if you also force the user to call methods in a specific order?
 // (Hint: what can you return instead of this?)
 
-// [Harder] How would you change your design if you wanted to make this guarantee, but still let people call methods in any order?
-// (Hint: what TypeScript feature can you use to make each method’s return type “add” to the this type after each method call?)
-
-type Method = 'get' | 'post' | null;
-
 class RequestBuilder {
-    protected method: Method = null
+    protected method: 'get' | 'post' | null = null
     protected url: string | null = null
     protected data: object | null = null
 
@@ -181,5 +176,39 @@ new RequestBuilder()
     .setData({firstName: 'Anna'})
     .send()
 
-// So we would need the calls to return the class itself in order, but only return the class on the condition that something
-// else has been set
+// [Harder] How would you change your design if you wanted to make this guarantee, but still let people call methods in any order?
+// (Hint: what TypeScript feature can you use to make each method’s return type “add” to the this type after each method call?)
+
+interface BuildableRequest {
+    url: string
+    method: 'get' | 'post'
+    data?: object
+}
+
+class RequestBuilder2 {
+    method?: 'get' | 'post'
+    url?: string
+    data?: object
+
+    setMethod(method: 'get' | 'post'): this & Pick<BuildableRequest, 'method'> {
+        return Object.assign(this, {method})
+    }
+
+    setURL(url: string): this & Pick<BuildableRequest, 'url'> {
+        return Object.assign(this, {url})
+    }
+
+    setData(data: object | null): this & Pick<BuildableRequest, 'data'> {
+        return Object.assign(this, {data})
+    }
+
+    build(this: BuildableRequest) {
+        return this
+    }
+}
+
+new RequestBuilder2()
+    .setURL('/users')
+    .setMethod('get')
+    .setData({firstName: 'Anna'})
+    .build()
